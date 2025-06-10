@@ -1,3 +1,6 @@
+library(Seurat)               
+library(ggplot2)    
+
 # Individual analysis from data_combined_singlets-----------
 
 split_data <- SplitObject(data_combined_singlets, split.by = "orig.ident")
