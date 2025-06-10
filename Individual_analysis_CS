@@ -1,0 +1,83 @@
+# Individual analysis from data_combined_singlets-----------
+
+split_data <- SplitObject(data_combined_singlets, split.by = "orig.ident")
+
+CS1_singlets <- split_data[["CS1"]]
+CS2_singlets <- split_data[["CS2"]]
+CS3_singlets <- split_data[["CS3"]]
+CS4_singlets <- split_data[["CS4"]]
+CS5_singlets <- split_data[["CS5"]]
+CS6_singlets <- split_data[["CS6"]]
+
+#CS1-----
+CS1_singlets <- SCTransform(CS1_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS1_singlets <- RunPCA(CS1_singlets, verbose = FALSE)
+ElbowPlot(CS1_singlets, ndims = 50)
+CS1_singlets <- RunUMAP(CS1_singlets, dims = 1:20, verbose = FALSE)
+CS1_singlets <- FindNeighbors(CS1_singlets, dims = 1:20, verbose = FALSE)
+CS1_singlets <- FindClusters(CS1_singlets, verbose = FALSE, resolution = c(0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+
+resolution_find_clusters <- "SCT_snn_res.0.3"
+Idents(object = CS1_singlets) <- resolution_find_clusters
+CS1_singlets$seurat_clusters <- CS1_singlets$SCT_snn_res.0.3
+
+#CS2-----
+CS2_singlets <- SCTransform(CS2_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS2_singlets <- RunPCA(CS2_singlets, verbose = FALSE)
+ElbowPlot(CS2_singlets, ndims = 50)
+CS2_singlets <- RunUMAP(CS2_singlets, dims = 1:30, verbose = FALSE)
+CS2_singlets <- FindNeighbors(CS2_singlets, dims = 1:30, verbose = FALSE)
+CS2_singlets <- FindClusters(CS2_singlets, verbose = FALSE, resolution = c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+
+resolution_find_clusters <- "SCT_snn_res.0.4"
+Idents(object = CS2_singlets) <- resolution_find_clusters
+CS2_singlets$seurat_clusters <- CS2_singlets$SCT_snn_res.0.4
+
+#CS3-----
+CS3_singlets <- SCTransform(CS3_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS3_singlets <- RunPCA(CS3_singlets, verbose = FALSE)
+ElbowPlot(CS3_singlets, ndims = 50)
+CS3_singlets <- RunUMAP(CS3_singlets, dims = 1:21, verbose = FALSE)
+CS3_singlets <- FindNeighbors(CS3_singlets, dims = 1:21, verbose = FALSE)
+CS3_singlets <- FindClusters(CS3_singlets, verbose = FALSE, resolution = c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+
+resolution_find_clusters <- "SCT_snn_res.0.5"
+Idents(object = CS3_singlets) <- resolution_find_clusters
+CS3_singlets$seurat_clusters <- CS3_singlets$SCT_snn_res.0.5
+
+#CS4-----
+CS4_singlets <- SCTransform(CS4_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS4_singlets <- RunPCA(CS4_singlets, verbose = FALSE)
+ElbowPlot(CS4_singlets, ndims = 50)
+CS4_singlets <- RunUMAP(CS4_singlets, dims = 1:27, verbose = FALSE)
+CS4_singlets <- FindNeighbors(CS4_singlets, dims = 1:27, verbose = FALSE)
+CS4_singlets <- FindClusters(CS4_singlets, verbose = FALSE, resolution = c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+
+resolution_find_clusters <- "SCT_snn_res.0.5"
+Idents(object = CS4_singlets) <- resolution_find_clusters
+CS4_singlets$seurat_clusters <- CS4_singlets$SCT_snn_res.0.5
+
+#CS5-----
+CS5_singlets <- SCTransform(CS5_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS5_singlets <- RunPCA(CS5_singlets, verbose = FALSE)
+ElbowPlot(CS5_singlets, ndims = 50)
+CS5_singlets <- RunUMAP(CS5_singlets, dims = 1:21, verbose = FALSE)
+CS5_singlets <- FindNeighbors(CS5_singlets, dims = 1:21, verbose = FALSE)
+CS5_singlets <- FindClusters(CS5_singlets, verbose = FALSE, resolution = c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+
+resolution_find_clusters <- "SCT_snn_res.0.4"
+Idents(object = CS5_singlets) <- resolution_find_clusters
+CS5_singlets$seurat_clusters <- CS5_singlets$SCT_snn_res.0.4
+
+#CS6-----
+CS6_singlets <- SCTransform(CS6_singlets, vars.to.regress = "percent_mt", verbose = FALSE)
+CS6_singlets <- RunPCA(CS6_singlets, verbose = FALSE)
+ElbowPlot(CS6_singlets, ndims = 50)
+CS6_singlets <- RunUMAP(CS6_singlets, dims = 1:32, verbose = FALSE)
+CS6_singlets <- FindNeighbors(CS6_singlets, dims = 1:32, verbose = FALSE)
+CS6_singlets <- FindClusters(CS6_singlets, verbose = FALSE, resolution = c(0.2, 0.3, 0.4, 0.5, 0.6))
+
+resolution_find_clusters <- "SCT_snn_res.0.2"
+Idents(object = CS6_singlets) <- resolution_find_clusters
+CS6_singlets$seurat_clusters <- CS6_singlets$SCT_snn_res.0.2
+
