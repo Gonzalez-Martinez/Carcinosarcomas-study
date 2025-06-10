@@ -6,42 +6,77 @@ library(DoubletFinder)
 
 setwd("~/scRNAseq_SilviaG/Endo")
 
-filename <- file.path("E:/singleCell/Carrera4/20240422/Agregados/outs/count/filtered_feature_bc_matrix.h5")
+filename <- file.path("F:/singleCell/Carrera4/20240422/A2_cr/outs/per_sample_outs/3/count/sample_filtered_feature_bc_matrix.h5")
 hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
                        unique.features = TRUE)
-Endometrial_matrix <- CreateSeuratObject(counts = hdf5_obj)
+CS1 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS1$orig.ident <- "CS1"
+filename <- file.path("F:/singleCell/Carrera4/20240422/A2_cr/outs/per_sample_outs/4/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+CS2 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS2$orig.ident <- "CS2"
+filename <- file.path("F:/singleCell/Carrera4/20240422/D2_cr/outs/per_sample_outs/15/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+CS3 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS3$orig.ident <- "CS3"
+filename <- file.path("F:/singleCell/Carrera4/20240422/B2_cr/outs/per_sample_outs/5/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+CS4 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS4$orig.ident <- "CS4"
+filename <- file.path("F:/singleCell/Carrera4/20240422/A2_cr/outs/per_sample_outs/2/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+CS5 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS5$orig.ident <- "CS5"
+filename <- file.path("F:/singleCell/Carrera4/20240422/A2_cr/outs/per_sample_outs/1/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+CS6 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+CS6$orig.ident <- "CS6"
+filename <- file.path("F:/singleCell/Carrera4/20240422/C2_cr/outs/per_sample_outs/11/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+N1 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+N1$orig.ident <- "N1"
+filename <- file.path("F:/singleCell/Carrera4/20240422/C2_cr/outs/per_sample_outs/12/count/sample_filtered_feature_bc_matrix.h5")
+hdf5_obj <- Read10X_h5(filename = filename,use.names = TRUE,
+                       unique.features = TRUE)
+N2 <- CreateSeuratObject(counts = hdf5_obj, min.cells = 0, min.features = 0)
+N2$orig.ident <- "N2"
 
-## QC and Filtering
-Endometrial_matrix$mitoPercent <- PercentageFeatureSet(Endometrial_matrix, pattern = '^MT-')
-VlnPlot(Endometrial_matrix, features = c("nFeature_RNA", "nCount_RNA", "mitoPercent"), ncol = 3, pt.size=0)
-Endometrial_matrix <- subset(Endometrial_matrix, subset = nFeature_RNA > 200 & nFeature_RNA < 9000 & nCount_RNA > 250 & nCount_RNA < 50000 & mitoPercent < 15)
+samples_v <- c("CS1", "CS2", "CS3", "CS4", "CS5", "CS6", "N1", "N2")
 
-# pre-process standard workflow
-Endometrial_matrix <- NormalizeData(object = Endometrial_matrix)
-Endometrial_matrix <- FindVariableFeatures(object = Endometrial_matrix)
-Endometrial_matrix <- ScaleData(object = Endometrial_matrix)
-Endometrial_matrix <- RunPCA(object = Endometrial_matrix)
-ElbowPlot(Endometrial_matrix)
-Endometrial_matrix <- FindNeighbors(object = Endometrial_matrix, dims = 1:15)
-Endometrial_matrix <- FindClusters(object = Endometrial_matrix, resolution =0.3)
-Endometrial_matrix <- RunUMAP(object = Endometrial_matrix, dims = 1:15)
+if (length(samples_v) > 1){
+  rawData_combined <- merge(x = get(samples_v[1]), y = sapply(samples_v[-1], get), add.cell.ids = samples_v)
+}
 
-#SUBSET POOLES
+## QC and Filtering ----------
 
-Endometrial_matrix_pool_1 <- subset(Endometrial_matrix, subset = Pool %in% c("1"))
-Endometrial_matrix_pool_2 <- subset(Endometrial_matrix, subset = Pool %in% c("2"))
-Endometrial_matrix_pool_3 <- subset(Endometrial_matrix, subset = Pool %in% c("3"))
-Endometrial_matrix_pool_4 <- subset(Endometrial_matrix, subset = Pool %in% c("4"))
-save(Endometrial_matrix_pool_1, file="Endometrial_matrix_pool_1.RData")
-save(Endometrial_matrix_pool_2, file="Endometrial_matrix_pool_2.RData")
-save(Endometrial_matrix_pool_3, file="Endometrial_matrix_pool_3.RData")
-save(Endometrial_matrix_pool_4, file="Endometrial_matrix_pool_4.RData")
+rawData_combined[["percent_mt"]] <- PercentageFeatureSet(rawData_combined, pattern = "^MT-")
+rawData_combined$log10GenesPerUMI <- log10(rawData_combined$nFeature_RNA) / log10(rawData_combined$nCount_RNA)
+min_nFeature <- 200
+min_log10GenesPerUMI <- 0.8
+min_percent_mt <- 20
+data_combined <- subset(rawData_combined, subset = nFeature_RNA > min_nFeature & log10GenesPerUMI > min_log10GenesPerUMI & percent_mt < min_percent_mt)
+VlnPlot(data_combined, features = c("nFeature_RNA", "nCount_RNA", "percent_mt"), ncol = 4, pt.size=0)
 
-#DOUBLETS
+# pre-process standard workflow-------
+data_combined <- NormalizeData(object = data_combined)
+data_combined <- FindVariableFeatures(object = data_combined)
+data_combined <- ScaleData(object = data_combined)
+data_combined <- RunPCA(object = data_combined)
+ElbowPlot(data_combined)
+data_combined <- FindNeighbors(object = data_combined, dims = 1:20)
+data_combined <- FindClusters(object = data_combined, resolution =0.3)
+data_combined <- RunUMAP(object = data_combined, dims = 1:20)
 
-###Pool 1
-## pK Identification
-sweep.res.list_ <- paramSweep(Endometrial_matrix_pool_1, PCs = 1:15, sct = FALSE)
+# Doublets detection---------
+## pK Identification (no ground-truth) 
+options(future.globals.maxSize = 2 * 1024^3)  # 2 GB
+sweep.res.list_ <- paramSweep(data_combined, PCs = 1:15, sct = TRUE)
 sweep.stats_ <- summarizeSweep(sweep.res.list_, GT = FALSE)
 bcmvn_ <- find.pK(sweep.stats_)
 
@@ -49,178 +84,47 @@ ggplot(bcmvn_, aes(pK, BCmetric, group = 1)) +
   geom_point() +
   geom_line()
 
-pK <- bcmvn_ %>% # select the pK that corresponds to max bcmvn to optimize doublet detection
-  filter(BCmetric == max(BCmetric)) %>%
+pK <- bcmvn_ %>%   filter(BCmetric == max(BCmetric)) %>%
   dplyr::select(pK) 
 print(pK)
 pK <- as.numeric(as.character(pK[[1]]))
 
 ## Homotypic Doublet Proportion Estimate 
-annotations <- Endometrial_matrix_pool_1@meta.data$seurat_clusters
-homotypic.prop <- modelHomotypic(annotations)           
-nExp_poi <- round(0.076*nrow(Endometrial_matrix_pool_1@meta.data))  
+annotations <- data_combined@meta.data$seurat_clusters
+homotypic.prop <- modelHomotypic(annotations)
+nExp_poi <- round(0.076*nrow(data_combined@meta.data))  
 nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
 
+
 # run doubletFinder 
-Endometrial_matrix_pool_1_doublets <- doubletFinder(Endometrial_matrix_pool_1, 
-                                                    PCs = 1:15, 
+data_combined_doublets_singlets <- doubletFinder(data_combined, 
+                                                    PCs = 1:20, 
                                                     pN = 0.25, 
                                                     pK = pK, 
                                                     nExp = nExp_poi.adj,
                                                     reuse.pANN = FALSE, sct = FALSE)
 
-colnames(Endometrial_matrix_pool_1_doublets@meta.data)[colnames(Endometrial_matrix_pool_1_doublets@meta.data) == "DF.classifications_0.25_0.04_2620"] <- "Singlets_doublets"
-table(Endometrial_matrix_pool_1_doublets@meta.data$Singlets_doublets)
-table(Endometrial_matrix_pool_1_doublets@meta.data$Sample_ID, 
-      Endometrial_matrix_pool_1_doublets@meta.data$Singlets_doublets)
-save(Endometrial_matrix_pool_1_doublets, file="Endometrial_matrix_pool_1_doublets.RData")
 
-###Pool 2
+colnames(data_combined_doublets_singlets@meta.data)[colnames(data_combined_doublets_singlets@meta.data) == "DF.classifications_0.25_0.02_7265"] <- "Singlets_doublets"
 
-sweep.res.list_ <- paramSweep(Endometrial_matrix_pool_2, PCs = 1:15, sct = FALSE)
-sweep.stats_ <- summarizeSweep(sweep.res.list_, GT = FALSE)
-bcmvn_ <- find.pK(sweep.stats_)
+# Singlets pre-process---------
+data_combined_singlets <- subset(data_combined_doublets_singlets, subset = Singlets_doublets == "Singlet")
 
-ggplot(bcmvn_, aes(pK, BCmetric, group = 1)) +
-  geom_point() +
-  geom_line()
+split_data <- SplitObject(data_combined_singlets, split.by = "orig.ident")
 
-pK <- sweep.stats_ %>%
-  filter(BCreal == max(BCreal)) %>%
-  dplyr::select(pK)
-print(pK)
+options(future.globals.maxSize = 2 * 1024^3)  
 
-pK <- as.numeric(as.character(pK[[1]]))
+split_data <- lapply(X = split_data, FUN = function(x) {
+  x@meta.data$orig.ident[1]
+  x <- SCTransform(x, vars.to.regress = c("percent_mt"), vst.flavor = "v2", verbose = FALSE)
+  return(x)
+})
 
-#Probar esto
-pK <- bcmvn_ %>% # select the pK that corresponds to max bcmvn to optimize doublet detection
-  filter(BCmetric == max(BCmetric)) %>%
-  dplyr::select(pK) 
-print(pK)
-pK <- as.numeric(as.character(pK[[1]]))
-
-## Homotypic Doublet Proportion Estimate 
-annotations <- Endometrial_matrix_pool_2@meta.data$seurat_clusters
-homotypic.prop <- modelHomotypic(annotations)           
-nExp_poi <- round(0.076*nrow(Endometrial_matrix_pool_2@meta.data))  
-nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
-
-# run doubletFinder 
-Endometrial_matrix_pool_2_doublets <- doubletFinder(Endometrial_matrix_pool_2, 
-                                                    PCs = 1:15, 
-                                                    pN = 0.25, 
-                                                    pK = pK, 
-                                                    nExp = nExp_poi.adj,
-                                                    reuse.pANN = FALSE, sct = FALSE)
-
-colnames(Endometrial_matrix_pool_2_doublets@meta.data)[colnames(Endometrial_matrix_pool_2_doublets@meta.data) == "DF.classifications_0.25_0.25_3227"] <- "Singlets_doublets"
-table(Endometrial_matrix_pool_2_doublets@meta.data$Singlets_doublets)
-table(Endometrial_matrix_pool_2_doublets@meta.data$Sample_ID, 
-      Endometrial_matrix_pool_2_doublets@meta.data$Singlets_doublets) 
-
-save(Endometrial_matrix_pool_2_doublets, file="Endometrial_matrix_pool_2_doublets.RData")
-
-###Pool 3
-
-sweep.res.list_ <- paramSweep(Endometrial_matrix_pool_3, PCs = 1:15, sct = FALSE)
-sweep.stats_ <- summarizeSweep(sweep.res.list_, GT = FALSE)
-bcmvn_ <- find.pK(sweep.stats_)
-
-ggplot(bcmvn_, aes(pK, BCmetric, group = 1)) +
-  geom_point() +
-  geom_line()
-
-pK <- bcmvn_ %>% # select the pK that corresponds to max bcmvn to optimize doublet detection
-  filter(BCmetric == max(BCmetric)) %>%
-  dplyr::select(pK) 
-print(pK)
-pK <- as.numeric(as.character(pK[[1]]))
-
-## Homotypic Doublet Proportion Estimate 
-annotations <- Endometrial_matrix_pool_3@meta.data$seurat_clusters
-homotypic.prop <- modelHomotypic(annotations)           
-nExp_poi <- round(0.076*nrow(Endometrial_matrix_pool_3@meta.data))  
-nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
-
-# run doubletFinder 
-Endometrial_matrix_pool_3_doublets <- doubletFinder(Endometrial_matrix_pool_3, 
-                                                    PCs = 1:15, 
-                                                    pN = 0.25, 
-                                                    pK = pK, 
-                                                    nExp = nExp_poi.adj,
-                                                    reuse.pANN = FALSE, sct = FALSE)
-
-colnames(Endometrial_matrix_pool_3_doublets@meta.data)[colnames(Endometrial_matrix_pool_3_doublets@meta.data) == "DF.classifications_0.25_0.3_2701"] <- "Singlets_doublets"
-table(Endometrial_matrix_pool_3_doublets@meta.data$Singlets_doublets)
-table(Endometrial_matrix_pool_3_doublets@meta.data$Sample_ID, 
-      Endometrial_matrix_pool_3_doublets@meta.data$Singlets_doublets)  
-save(Endometrial_matrix_pool_3_doublets, file="Endometrial_matrix_pool_3_doublets.RData")
-
-### Pool 4
-sweep.res.list_pbmc <- paramSweep(Endometrial_matrix_pool_4, PCs = 1:15, sct = FALSE)
-sweep.stats_ <- summarizeSweep(sweep.res.list_, GT = FALSE)
-bcmvn_ <- find.pK(sweep.stats_)
-
-ggplot(bcmvn_, aes(pK, BCmetric, group = 1)) +
-  geom_point() +
-  geom_line()
-
-pK <- bcmvn_ %>% # select the pK that corresponds to max bcmvn to optimize doublet detection
-  filter(BCmetric == max(BCmetric)) %>%
-  dplyr::select(pK) 
-print(pK)
-pK <- as.numeric(as.character(pK[[1]]))
-
-## Homotypic Doublet Proportion Estimate 
-annotations <- Endometrial_matrix_pool_4@meta.data$seurat_clusters
-homotypic.prop <- modelHomotypic(annotations)          
-nExp_poi <- round(0.076*nrow(Endometrial_matrix_pool_4@meta.data)) 
-nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
-
-# run doubletFinder 
-Endometrial_matrix_pool_4_doublets <- doubletFinder(Endometrial_matrix_pool_4, 
-                                                    PCs = 1:15, 
-                                                    pN = 0.25, 
-                                                    pK = pK, 
-                                                    nExp = nExp_poi.adj,
-                                                    reuse.pANN = FALSE, sct = FALSE)
-
-colnames(Endometrial_matrix_pool_4_doublets@meta.data)[colnames(Endometrial_matrix_pool_4_doublets@meta.data) == "DF.classifications_0.25_0.24_2591"] <- "Singlets_doublets"
-table(Endometrial_matrix_pool_4_doublets@meta.data$Singlets_doublets)
-table(Endometrial_matrix_pool_4_doublets@meta.data$Sample_ID, 
-      Endometrial_matrix_pool_4_doublets@meta.data$Singlets_doublets) 
-save(Endometrial_matrix_pool_4_doublets, file="Endometrial_matrix_pool_4_doublets.RData")
-
-#Merge
-
-Endometrial_matrix_doublets <- merge(Endometrial_matrix_pool_1_doublets, y = list(Endometrial_matrix_pool_2_doublets, Endometrial_matrix_pool_3_doublets, Endometrial_matrix_pool_4_doublets))
-
-# pre-process standard workflow
-Endometrial_matrix_doublets <- NormalizeData(object = Endometrial_matrix_doublets)
-Endometrial_matrix_doublets <- FindVariableFeatures(object = Endometrial_matrix_doublets)
-Endometrial_matrix_doublets <- ScaleData(object = Endometrial_matrix_doublets)
-Endometrial_matrix_doublets <- RunPCA(object = Endometrial_matrix_doublets)
-ElbowPlot(Endometrial_matrix_doublets)
-Endometrial_matrix_doublets <- FindNeighbors(object = Endometrial_matrix_doublets, dims = 1:15)
-Endometrial_matrix_doublets <- FindClusters(object = Endometrial_matrix_doublets, resolution =0.3)
-Endometrial_matrix_doublets <- RunUMAP(object = Endometrial_matrix_doublets, dims = 1:15)
-
-Endometrial_matrix_singlets <- subset(Endometrial_matrix_doublets, subset = Singlets_doublets %in% c("Singlet"))
-
-#Carcinosarcomas + normal analysis-----------
-
-CS_normal <- subset(Endometrial_matrix_singlets, subset = Histological_type %in% c("Carcinosarcoma", "Normal"))
-
-CS_normal <- NormalizeData(object = CS_normal)
-CS_normal <- FindVariableFeatures(object = CS_normal)
-CS_normal <- ScaleData(object = CS_normal)
-CS_normal <- RunPCA(object = CS_normal)
-ElbowPlot(CS_normal)
-CS_normal <- FindNeighbors(object = CS_normal, dims = 1:15)
-CS_normal <- FindClusters(object = CS_normal, resolution =0.4)
-CS_normal <- RunUMAP(object = CS_normal, dims = 1:15)
-
-save(CS_normal, file="CS_normal.RData")
-
-markers_CS_normal <- FindAllMarkers(CS_normal, only.pos = TRUE)
-save(markers_CS_normal, file="markers_CS_normal.RData")
+data_combined_singlets <- RunPCA(data_combined_singlets, assay = "SCT")
+ElbowPlot(data_combined_singlets, ndims = 50)
+data_combined_singlets <- RunUMAP(data_combined_singlets, dims = 1:30)
+data_combined_singlets <- FindNeighbors(data_combined_singlets, dims = 1:30)
+data_combined_singlets <- FindClusters(data_combined_singlets, verbose = FALSE, resolution = c(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4))
+resolution_find_clusters <- "SCT_snn_res.0.6"
+Idents(object = data_combined_singlets) <- resolution_find_clusters
+data_combined_singlets$seurat_clusters <- data_combined_singlets$SCT_snn_res.0.6
