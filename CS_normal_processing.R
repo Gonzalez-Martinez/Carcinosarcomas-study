@@ -120,6 +120,9 @@ split_data <- lapply(X = split_data, FUN = function(x) {
   return(x)
 })
 
+data_combined_singlets <- merge(split_data[[1]], y = split_data[-1])
+features <- SelectIntegrationFeatures(object.list = split_data, nfeatures = 3000)
+VariableFeatures(data_combined_singlets) <- features
 data_combined_singlets <- RunPCA(data_combined_singlets, assay = "SCT")
 ElbowPlot(data_combined_singlets, ndims = 50)
 data_combined_singlets <- RunUMAP(data_combined_singlets, dims = 1:30)
